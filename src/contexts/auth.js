@@ -1,5 +1,6 @@
 import {createContext ,useState, useEffect} from 'react'
 import firebase from '../services/firebaseConection'
+import {toast} from 'react-toastify'
 
 export const AuthContext = createContext()
 
@@ -23,8 +24,89 @@ function AuthProvider({children}){
         loadStorage()
     },[])
 
+    //Fazendo login de um usuario
+    async function signIn(email, password){
+        setLoadingAuth(true)
+
+        await firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(async(value)=>{
+            let uid = value.user.uid
+
+            const userProfile = await firebase.firestore().collection("users")
+            .doc(uid).get()
+
+            let data={
+                uid: uid,
+                nome: userProfile.data().nome,
+                avatarUrl: userProfile.data().avatarUrl,
+                email: value.user.email
+            }
+            setUser(data)
+            storageUser(data)
+            setLoadingAuth(false)
+            toast.success("Bem vindo de volta!")
+
+        })
+        .catch((error)=>{
+            console.log(error)
+            setLoadingAuth(false)
+            toast.error("Ops algo deu errado!")
+        })
+    }
+
+    //Cadastrando um novo usuairio
+    async function signUp(email, password, nome){
+        setLoading(true)
+        await firebase.auth().createUserWithEmailAndPassword(email,password)
+        .then(async(value)=>{
+            let uid = value.user.uid
+
+            await firebase.firestore().collection("users")
+            .doc(uid).set({
+                nome: nome,
+                avatarUrl: null,
+            })
+            .then(()=>{
+                let data = {
+                    uid: uid,
+                    nome: nome,
+                    email: value.user.email,
+                    avatarUrl: null
+                }
+                setUser(data)
+                storageUser(data)
+                setLoadingAuth(false)
+                toast.success("Bem vindo a plataforma!")
+            })
+        })
+        .catch((error)=>{
+            console.log(error)
+            toast.error("Ops algo deu errado!")
+            setLoadingAuth(false)
+        })
+    }
+
+    function storageUser(data){
+        localStorage.setItem("SistemaUser", JSON.stringify(data))
+    }
+    // Logout do usuario
+    async function signOut(){
+        await firebase.auth().signOut()
+        localStorage.removeItem("SistemaUser")
+        setUser(null)
+    }
+
     return(
-        <AuthContext.Provider value={{signed: !!user, user, loading}}>
+        <AuthContext.Provider 
+        value={{
+        signed: !!user, 
+        user, 
+        loading, 
+        signUp,
+        signOut,
+        signIn,
+        loadingAuth
+        }}>
             {children}
         </AuthContext.Provider>
     )
