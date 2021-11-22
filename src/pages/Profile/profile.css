@@ -60,3 +60,7 @@
     justify-content: center;
     align-items: center;
 }
+.logout-btn:hover{
+    background-color: #121212f3;
+    color: #f8f8f8;
+}
