@@ -162,9 +162,12 @@ export default function Dashboard() {
                                                     onClick={ ()=>{togglePostModel(item)} }
                                                     />
                                                 </button>
-                                                <button className="action" style={{ backgroundColor: "#f6a935" }}>
+                                                <Link className="action" 
+                                                style={{ backgroundColor: "#f6a935"}}
+                                                    to={`/new/${item.id}`}
+                                                >
                                                     <FiEdit2 color="#fff" size={17} />
-                                                </button>
+                                                </Link>
                                             </td>
                                         </tr>
                                     )

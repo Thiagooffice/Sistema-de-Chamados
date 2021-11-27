@@ -1,6 +1,7 @@
 import Header from '../../components/Header'
 import Title from '../../components/Title'
 import './new.css'
+import { useHistory, useParams } from 'react-router-dom'
 
 import {FiPlusCircle} from 'react-icons/fi'
 import { useState, useEffect, useContext } from 'react/cjs/react.development'
@@ -9,6 +10,10 @@ import firebase from '../../services/firebaseConection'
 import {toast} from 'react-toastify'
 
 export default function New(){
+
+
+    const { id } = useParams()
+    const history = useHistory()
 
     const [loadCustomers, setLoadCustomers]=useState(true)
     const [customers, setCustomers]=useState([])
@@ -43,6 +48,10 @@ export default function New(){
             setCustomers(lista)
             setLoadCustomers(false)
 
+            if(id){
+                loadId(lista)
+            }
+
             })
             .catch((error)=>{
                 console.log("Deu algum erro!", error)
@@ -52,6 +61,16 @@ export default function New(){
         }
         loadCustomers()
     },[])
+
+    async function loadId(lista){
+        await firebase.firestore().collection("chamados").doc(id)
+    .get()
+    .then((snapshot)=>{
+        setAssunto(snapshot.data().assunto)
+        setStatus(snapshot.data().status)
+        setComplemento(snapshot.data().complemento)
+    })
+    }
 
 
     async function handleRegister(e){
